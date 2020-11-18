@@ -27,42 +27,54 @@
     var length = 'length';
     var Math_round = Math.round;
 
-    var names = {};
+    var classes = {};
 
     var reset = function() {
         var elems = document.getElementsByClassName('sync'+scroll);
 
         // clearing existing listeners
-        var i, j, el, found, name;
-        for (name in names) {
-            if (names.hasOwnProperty(name)) {
-                for (i = 0; i < names[name][length]; i++) {
-                    names[name][i]['remove'+EventListener](
-                        scroll, names[name][i].syn, 0
+        var i, j, el, found, syncClass;
+        for (syncClass in classes) {
+            if (classes.hasOwnProperty(syncClass)) {
+                for (i = 0; i < classes[syncClass][length]; i++) {
+                    classes[syncClass][i]['remove'+EventListener](
+                        scroll, classes[syncClass][i].syn, 0
                     );
                 }
             }
         }
 
+        syncClass = undefined
         // setting-up the new listeners
         for (i = 0; i < elems[length];) {
             found = j = 0;
             el = elems[i++];
-            if (!(name = el.getAttribute('name'))) {
+            
+            for(var cls of el.classList) {
+                if(/sync-name-.*/.test(cls)) {
+                    syncClass = cls
+                    break;
+                }
+            }
+            if(!syncClass) {
+                continue
+            }
+
+            /*if (!(name = el.getAttribute('name'))) {
                 // name attribute is not set
                 continue;
-            }
+            }*/
 
             el = el[scroll+'er']||el;  // needed for intence
 
             // searching for existing entry in array of names;
             // searching for the element in that entry
-            for (;j < (names[name] = names[name]||[])[length];) {
-                found |= names[name][j++] == el;
+            for (;j < (classes[syncClass] = classes[syncClass]||[])[length];) {
+                found |= classes[syncClass][j++] == el;
             }
 
             if (!found) {
-                names[name].push(el);
+                classes[syncClass].push(el);
             }
 
             el.eX = el.eY = 0;
@@ -71,7 +83,7 @@
                 el[addEventListener](
                     scroll,
                     el.syn = function() {
-                        var elems = names[name];
+                        var elems = classes[name];
 
                         var scrollX = el[scroll+Left];
                         var scrollY = el[scroll+Top];
@@ -123,7 +135,7 @@
                         }
                     }, 0
                 );
-            })(el, name);
+            })(el, syncClass);
         }
     }
     
@@ -136,5 +148,3 @@
 
     exports.reset = reset;
 }));
-
-
